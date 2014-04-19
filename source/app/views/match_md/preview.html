@@ -10,9 +10,14 @@
 				margin-top: 30px;
 				margin-bottom: 20px;
 			}
+
 			.events-filter .panel-body {
 				padding-top: 5px;
 				padding-bottom: 5px;
+			}
+			.events-filter legend {
+				font-size: 18px;
+				margin-bottom: 5px;
 			}
 
 			iframe {
@@ -54,75 +59,88 @@
 					<div class="panel-body">
 						<div class="row">
 							<div class="col-md-6">
-								<div class="radio">
-									<label>
-										<input type="radio" name="view" value="simple"
-											onchange="window.reload()" <%- form.checked(query.view.simple) %>>
-										Simple text events
-									</label>
-								</div>
-								<div class="radio">
-									<label>
-										<input type="radio" name="view" value="reddit"
-											onchange="window.reload()" <%- form.checked(query.view.reddit) %>>
-										Reddit styled events
-									</label>
-								</div>
+								<fieldset>
+									<legend>Event view</legend>
+
+									<div class="radio">
+										<label>
+											<input type="radio" name="view" value="simple"
+												onchange="window.reload()" <%- form.checked(query.view.simple) %>>
+											Simple text events
+										</label>
+									</div>
+									<div class="radio">
+										<label>
+											<input type="radio" name="view" value="reddit"
+												onchange="window.reload()" <%- form.checked(query.view.reddit) %>>
+											Reddit styled events
+										</label>
+									</div>
+								</fieldset>
 							</div>
-							<div class="col-md-2">
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="exclude" value="comment"
-											onchange="window.reload()" <%- form.checked(query.exclude.comment) %>>
-										Comment
-									</label>
-								</div>
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="exclude" value="goal"
-											onchange="window.reload()" <%- form.checked(query.exclude.goal) %>>
-										Goal
-									</label>
-								</div>
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="exclude" value="substitution"
-											onchange="window.reload()" <%- form.checked(query.exclude.substitution) %>>
-										Substitution
-									</label>
-								</div>
-							</div>
-							<div class="col-md-2">
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="exclude" value="yellow_card"
-											onchange="window.reload()" <%- form.checked(query.exclude.yellow_card) %>>
-										Yellow card
-									</label>
-								</div>
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="exclude" value="red_card"
-											onchange="window.reload()" <%- form.checked(query.exclude.red_card) %>>
-										Red card
-									</label>
-								</div>
-							</div>
-							<div class="col-md-2">
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="exclude" value="half_time"
-											onchange="window.reload()" <%- form.checked(query.exclude.half_time) %>>
-										Half time
-									</label>
-								</div>
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="exclude" value="full_time"
-											onchange="window.reload()" <%- form.checked(query.exclude.full_time) %>>
-										Full time
-									</label>
-								</div>
+
+							<div class="col-md-6">
+								<fieldset>
+									<legend>Exclude events</legend>
+
+									<div class="row">
+										<div class="col-md-4">
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" name="exclude" value="comment"
+														onchange="window.reload()" <%- form.checked(query.exclude.comment) %>>
+													Comment
+												</label>
+											</div>
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" name="exclude" value="goal"
+														onchange="window.reload()" <%- form.checked(query.exclude.goal) %>>
+													Goal
+												</label>
+											</div>
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" name="exclude" value="substitution"
+														onchange="window.reload()" <%- form.checked(query.exclude.substitution) %>>
+													Substitution
+												</label>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" name="exclude" value="yellow_card"
+														onchange="window.reload()" <%- form.checked(query.exclude.yellow_card) %>>
+													Yellow card
+												</label>
+											</div>
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" name="exclude" value="red_card"
+														onchange="window.reload()" <%- form.checked(query.exclude.red_card) %>>
+													Red card
+												</label>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" name="exclude" value="half_time"
+														onchange="window.reload()" <%- form.checked(query.exclude.half_time) %>>
+													Half time
+												</label>
+											</div>
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" name="exclude" value="full_time"
+														onchange="window.reload()" <%- form.checked(query.exclude.full_time) %>>
+													Full time
+												</label>
+											</div>
+										</div>
+									</div>
+								</fieldset>
 							</div>
 						</div>
 					</div>

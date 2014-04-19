@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dribler - <%= format.teams(lineup.teams) %></title>
+
+		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+		<style type="text/css">
+			.nav {
+				margin-top: 30px;
+				margin-bottom: 20px;
+			}
+			.events-filter .panel-body {
+				padding-top: 5px;
+				padding-bottom: 5px;
+			}
+
+			iframe {
+				border: none;
+				margin: 0;
+				padding: 0;
+
+				width: 100%;
+			}
+		</style>
+
+		<script type="text/javascript">
+			(function() {
+				var resize = function(iframe) {
+					var height = iframe.contentWindow.document.body.scrollHeight;
+					iframe.style.height = height + 'px';
+				};
+
+				var reload = function() {
+					var form = document.getElementById('query');
+					form.submit();
+				};
+
+				window.resize = resize;
+				window.reload = reload;
+			}());
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<ul class="nav nav-tabs">
+				<li><a href="/matches/<%= match.id %>">Default</a></li>
+				<li class="<%= extension === 'md' ? 'active' : '' %>"><a href="/matches/preview/<%= match.id %>.md<%= search %>">Markdown</a></li>
+				<li class="<%= extension === 'html' ? 'active' : '' %>"><a href="/matches/preview/<%= match.id %>.html<%= search %>">HTML</a></li>
+			</ul>
+
+			<form id="query" method="GET" role="form" class="events-filter">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="radio">
+									<label>
+										<input type="radio" name="view" value="simple"
+											onchange="window.reload()" <%- form.checked(query.view.simple) %>>
+										Simple text events
+									</label>
+								</div>
+								<div class="radio">
+									<label>
+										<input type="radio" name="view" value="reddit"
+											onchange="window.reload()" <%- form.checked(query.view.reddit) %>>
+										Reddit styled events
+									</label>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="exclude" value="comment"
+											onchange="window.reload()" <%- form.checked(query.exclude.comment) %>>
+										Comment
+									</label>
+								</div>
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="exclude" value="goal"
+											onchange="window.reload()" <%- form.checked(query.exclude.goal) %>>
+										Goal
+									</label>
+								</div>
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="exclude" value="substitution"
+											onchange="window.reload()" <%- form.checked(query.exclude.substitution) %>>
+										Substitution
+									</label>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="exclude" value="yellow_card"
+											onchange="window.reload()" <%- form.checked(query.exclude.yellow_card) %>>
+										Yellow card
+									</label>
+								</div>
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="exclude" value="red_card"
+											onchange="window.reload()" <%- form.checked(query.exclude.red_card) %>>
+										Red card
+									</label>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="exclude" value="half_time"
+											onchange="window.reload()" <%- form.checked(query.exclude.half_time) %>>
+										Half time
+									</label>
+								</div>
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="exclude" value="full_time"
+											onchange="window.reload()" <%- form.checked(query.exclude.full_time) %>>
+										Full time
+									</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+
+			<iframe src="/matches/<%= match.id %>.<%= extension %><%= search %>" frameborder="0" onload="window.resize(this)"></iframe>
+		</div>
+	</body>
+</html>

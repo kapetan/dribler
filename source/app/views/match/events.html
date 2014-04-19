@@ -1,0 +1,33 @@
+<h3>Match events</h3>
+
+<table class="table table-hover events">
+	<tbody>
+		<% events.forEach(function(event) { %>
+			<tr onclick="window.expand(this)" class="event <%= event.type %> <%= contextual(event.type) %>">
+				<td class="event-time"><strong><%= format.time(event.time) %></strong></td>
+				<td class="event-type"><strong><%= format.type(event.type) %></strong></td>
+				<td class="event-data">
+					<% if(event.type in { yellow_card: 1, red_card: 1, goal: 1 }) { %>
+						<%= format.player(event.data) %>
+					<% } else if(event.type === 'substitution') { %>
+						<dl class="dl-horizontal">
+							<dt>Leaving</dt>
+							<dd><%= format.player(event.data.leaving) %></dd>
+							<dt>Entering</dt>
+							<dd><%= format.player(event.data.entering) %></dd>
+						</dl>
+					<% } else { %>
+						<span title="<%= event.data %>"><%= string.truncate(event.data) %></span>
+					<% } %>
+				</td>
+				<td class="event-players"><%{ './_list' { list: event.players } }%></td>
+				<td class="event-teams"><%{ './_list' { list: event.teams } }%></td>
+			</tr>
+			<tr class="hidden event-json no-hover">
+				<td colspan="5">
+					<pre><%- toHTML(event.toCompactJSON()) %></pre>
+				</td>
+			</tr>
+		<% }) %>
+	</tbody>
+</table>

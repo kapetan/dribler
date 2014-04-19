@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dribler - Matches</title>
+
+		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+		<style type="text/css">
+			.matches-create .panel-body {
+				padding-top: 5px;
+				padding-bottom: 5px;
+			}
+			.matches-create legend {
+				font-size: 18px;
+			}
+
+			.matches {
+				margin-top: 50px;
+			}
+			.matches tbody tr {
+				cursor: pointer;
+			}
+			.matches .match-latest {
+				width: 10%;
+			}
+			.matches .match-teams {
+				width: 70%;
+			}
+			.matches .match-providers {
+				width: 20%;
+			}
+		</style>
+
+		<script type="text/javascript">
+			(function() {
+				var href = function(element) {
+					var link = element.getAttribute('data-href');
+					window.location = link;
+				};
+
+				window.href = href;
+			}());
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="page-header">
+				<h1>Matches</h1>
+			</div>
+
+			<form action="/matches" method="POST" role="form" class="form-horizontal matches-create">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-6">
+								<fieldset>
+									<legend>Lineup</legend>
+
+									<div class="form-group">
+										<label class="col-md-3 control-label" for="lineup_provider">Provider</label>
+										<div class="col-md-8">
+											<select class="form-control" name="lineup_provider" id="lineup_provider">
+												<% lineups.forEach(function(name) { %>
+													<option value="<%= name %>"><%= name %></option>
+												<% }) %>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-md-3 control-label" for="lineup_url">URL</label>
+										<div class="col-md-8">
+											<input class="form-control" type="text" name="lineup_url" id="lineup_url">
+										</div>
+									</div>
+								</fieldset>
+							</div>
+
+							<div class="col-md-6">
+								<fieldset>
+									<legend>Feed</legend>
+
+									<div class="form-group">
+										<label class="col-md-3 control-label" for="feed_provider">Provider</label>
+										<div class="col-md-8">
+											<select class="form-control" name="feed_provider" id="feed_provider">
+												<% feeds.forEach(function(name) { %>
+													<option value="<%= name %>"><%= name %></option>
+												<% }) %>
+											</select>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-md-3 control-label" for="feed_url">URL</label>
+										<div class="col-md-8">
+											<input class="form-control" type="text" name="feed_url" id="feed_url">
+										</div>
+									</div>
+								</fieldset>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<input type="submit" class="btn btn-primary" value="Create match">
+				<input type="reset" class="btn btn-default" value="Clear">
+			</form>
+
+			<table class="table table-hover matches">
+				<thead>
+					<tr>
+						<th>Latest</th>
+						<th>Teams</th>
+						<th class="text-right">Lineup/Feed</th>
+					</tr>
+				</thead>
+				<tbody>
+					<% matches.forEach(function(match) { %>
+						<tr data-href="/matches/<%= match.id %>" onclick="window.href(this)" class="<%= match.error ? 'danger' : '' %>">
+							<td class="match-latest"><strong><%= format.time(match.latest && match.latest.time) %></strong></td>
+							<td class="match-teams"><%= match.lineup ? format.teams(match.lineup.teams) : '' %></td>
+							<td class="match-providers text-right"><%= match.options.lineup.provider %>/<%= match.options.feed.provider %></td>
+						</tr>
+					<% }) %>
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>

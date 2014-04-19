@@ -1,0 +1,16 @@
+{
+  "name": "dribler",
+  "version": "0.0.1",
+  "description": "Soccer feeds",
+  "dependencies": {
+    "request": "~2.34.0",
+    "cheerio": "~0.13.1",
+    "diacritic": "0.0.2",
+    "pejs": "~0.6.4",
+    "root": "~0.7.1",
+    "json-markup": "~0.1.5",
+    "send": "~0.2.0",
+    "traverse": "~0.6.6",
+    "marked": "~0.3.2"
+  }
+}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dribler - <%= format.teams(lineup.teams) %></title>
+
+		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/public/json-markup.css">
+
+		<style type="text/css">
+			.nav {
+				margin-top: 30px;
+			}
+
+			.table-hover > tbody > tr.no-hover:hover > td,
+			.table-hover > tbody > tr.no-hover:hover > th {
+				background-color: transparent;
+			}
+
+			.players .player-name {
+				width: 60%;
+			}
+			.players .player-number {
+				width: 10%;
+			}
+			.players .player-postition {
+				width: 30%;
+			}
+
+			.events .event {
+				cursor: pointer;
+			}
+
+			.events .event-json pre {
+				margin-bottom: 0;
+			}
+			.events .json-markup-string {
+				max-width: 700px;
+				display: inline-block;
+			}
+			.events .json-markup-key {
+				vertical-align: top;
+			}
+
+			.events .event-time {
+				width: 8%;
+			}
+			.events .event-type {
+				width: 12%;
+			}
+
+			.events .event-data {
+				width: 40%;
+			}
+			.events .event-data dl {
+				margin: 0;
+			}
+			.events .event-data dt {
+				width: 120px;
+			}
+			.events .event-data dd {
+				margin-left: 130px;
+			}
+
+			.events .event-players {
+				width: 20%;
+			}
+			.events .event-teams {
+				width: 20%
+			}
+			.events ul {
+				margin-bottom: 0;
+			}
+		</style>
+
+		<script type="text/javascript">
+			(function() {
+				var viewport = function() {
+					var body = document.body;
+					var html = document.documentElement;
+
+					return {
+						height: html.clientHeight,
+						width: html.clientWidth,
+						top: body.scrollTop,
+						left: body.scrollLeft
+					};
+				};
+
+				var rectangle = function(element) {
+					var body = document.body;
+					var rect = element.getBoundingClientRect();
+
+					var result = {
+						top: rect.top + body.scrollTop,
+						left: rect.left + body.scrollLeft,
+						width: rect.width,
+						height: rect.height
+					};
+
+					if(!result.width) {
+						result.width = element.clientWidth;
+						result.height = element.clientHeight;
+					}
+
+					return result;
+				};
+
+				var hasClass = function(element, name) {
+					return element.className.indexOf(name) !== -1;
+				};
+
+				var addClass = function(element, name) {
+					element.className += (' ' + name);
+				};
+
+				var removeClass = function(element, name) {
+					element.className = element.className
+						.replace(name, '')
+						.replace(/\s+/, ' ')
+						.trim();
+				};
+
+				var expand = function(element) {
+					var json = element.nextElementSibling;
+
+					if(!hasClass(json, 'hidden')) return addClass(json, 'hidden');
+
+					removeClass(json, 'hidden');
+
+					var vp = viewport();
+					var rect = rectangle(json);
+
+					var overflow = (rect.top + rect.height) - (vp.top + vp.height);
+
+					if(overflow > 0) {
+						window.scrollTo(0, vp.top + overflow);
+					}
+				};
+
+				window.expand = expand;
+			}());
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<ul class="nav nav-tabs">
+				<li class="active"><a href="/matches/<%= match.id %>">Default</a></li>
+				<li><a href="/matches/preview/<%= match.id %>.md">Markdown</a></li>
+				<li><a href="/matches/preview/<%= match.id %>.html">HTML</a></li>
+			</ul>
+
+			<div class="page-header">
+				<h1><%= format.teams(lineup.teams) %></h1>
+			</div>
+
+			<dl class="dl-horizontal">
+				<dt>Lineup</dt>
+				<dd><code><%= match.options.lineup.url %></code></dd>
+				<dt>Feed</dt>
+				<dd><code><%= match.options.feed.url %></code></dd>
+			</dl>
+
+			<div class="row">
+				<div class="col-md-6">
+					<%{ './team' { team: lineup.team1 } }%>
+				</div>
+				<div class="col-md-6">
+					<%{ './team' { team: lineup.team2 } }%>
+				</div>
+			</div>
+
+			<%{ './events' }%>
+		</div>
+	</body>
+</html>

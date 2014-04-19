@@ -1,0 +1,19 @@
+<h3><%= team.name %></h3>
+
+<%{ './players.html' { caption: 'Starters', players: team.starters } }%>
+
+<%{ './players.html' { caption: 'Substitutes', players: team.substitutes } }%>
+
+<table class="table table-bordered">
+	<thead>
+		<tr class="active">
+			<th colspan="3">Coach</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td><%= team.coach.name %></td>
+		</tr>
+	</tbody>
+</table>
+

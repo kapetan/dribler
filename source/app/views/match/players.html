@@ -1,0 +1,16 @@
+<table class="table table-bordered players">
+	<thead>
+		<tr class="active">
+			<th colspan="3"><%= caption %></th>
+		</tr>
+	</thead>
+	<tbody>
+		<% players.forEach(function(player) { %>
+			<tr>
+				<td class="player-number"><%= player.number || '-' %></td>
+				<td class="player-name"><%= player.name %></td>
+				<td class="player-position"><%= player.position || '-' %></td>
+			</tr>
+		<% }) %>
+	</tbody>
+</table>

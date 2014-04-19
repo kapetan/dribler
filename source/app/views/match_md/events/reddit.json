@@ -1,0 +1,22 @@
+{
+	"goal": {
+		"own_goal": "[](//#red-ball) **Own goal** {event.data}",
+		"default": "[](//#ball) **GOAL {event.data.team}!** {event.data}"
+	},
+	"red_card": {
+		"yellow_card": "[](//#yellow) [](//#red) {event.data}",
+		"default": "[](//#red) {event.data}"
+	},
+	"yellow_card": {
+		"default": "[](//#yellow) {event.data}"
+	},
+	"substitution": {
+		"default": "[](//#down) {event.data.leaving} [](//#up) {event.data.entering}"
+	},
+	"half_time": {
+		"default": "[](//#whistle) Half time"
+	},
+	"full_time": {
+		"default": "[](//#whistle) Full time"
+	}
+}

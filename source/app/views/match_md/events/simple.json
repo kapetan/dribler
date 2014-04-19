@@ -1,0 +1,23 @@
+{
+	"goal": {
+		"assist": "Goal {event.data.team}! {event.data} scores with an assist from {event.extra.assist}.",
+		"own_goal": "Own goal by {event.data}.",
+		"default": "Goal {event.data.team}! {event.data} scores."
+	},
+	"red_card": {
+		"yellow_card": "{event.data} gets a second yellow and is shown the red card.",
+		"default": "{event.data} gets a second yellow and is shown the red card."
+	},
+	"yellow_card": {
+		"default": "{event.data} is shown the yellow card."
+	},
+	"substitution": {
+		"default": "Substitution {event.data.leaving.team}. {event.data.entering} replaces {event.data.leaving}."
+	},
+	"half_time": {
+		"default": "**Half time**"
+	},
+	"full_time": {
+		"default": "**Full time**"
+	}
+}

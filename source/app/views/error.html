@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dribler - Alert</title>
+
+		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+		<style type="text/css">
+			.stack {
+				margin-top: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="page-header">
+				<h1>Something went wrong...</h1>
+			</div>
+
+			<div class="alert alert-danger">
+				<p class="message">
+					<strong><%= error.message %></strong>
+				</p>
+
+				<% if(error.stack) { %>
+					<pre class="stack"><%= error.stack %></pre>
+				<% } %>
+			</div>
+		</div>
+	</body>
+</html>

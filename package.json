@@ -11,6 +11,7 @@
     "json-markup": "~0.1.5",
     "send": "~0.2.0",
     "traverse": "~0.6.6",
-    "marked": "~0.3.2"
+    "marked": "~0.3.2",
+    "cookie": "~0.1.2"
   }
 }

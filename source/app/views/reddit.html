@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dribler - <%= format.teams(lineup.teams) %></title>
+
+		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+		<style type="text/css">
+			iframe {
+				border: none;
+				margin: 0;
+				padding: 0;
+
+				width: 100%;
+				margin-bottom: 20px;
+			}
+
+			.thread-fields {
+				margin-top: 30px;
+			}
+			.thread-fields .thread-captcha {
+				padding-top: 8px;
+			}
+
+			.actions {
+				margin-top: 30px;
+				margin-bottom: 20px;
+			}
+
+			.exclude-events-label {
+				margin-top: 15px;
+			}
+		</style>
+
+		<script type="text/javascript">
+			(function() {
+				var serialize = function(inputs) {
+					var result = [];
+
+					for(var i = 0; i < inputs.length; i++) {
+						var inp = inputs[i];
+
+						if(inp.checked) {
+							var pair = [inp.name, inp.value].map(encodeURIComponent).join('=');
+							result.push(pair);
+						}
+					}
+
+					return result.join('&');
+				};
+
+				var reload = function() {
+					var content = document.getElementById('thread-content');
+					var inputs = document.querySelectorAll('input[name=exclude],input[name=view]');
+
+					var src = content.src.split('?')[0];
+
+					content.src = src + '?' + serialize(inputs);
+				};
+
+				var resize = function() {
+					var iframe = document.getElementById('thread-content');
+					var reddit = document.getElementById('reddit-form');
+
+					var height = reddit.clientHeight;
+
+					iframe.style.height = height + 'px';
+				};
+
+				window.onload = function() {
+					resize();
+					reload();
+				};
+
+				window.reload = reload;
+				window.resize = resize;
+			}());
+		</script>
+	</head>
+	<body onload="window.onload()">
+		<div class="container">
+			<div class="page-header">
+				<h1><%= format.teams(lineup.teams) %></h1>
+			</div>
+
+			<form action="/matches/reddit/<%= match.id %>" method="POST" role="form">
+				<div class="row">
+					<div id="reddit-form" class="col-md-6">
+						<fieldset class="user-fields">
+							<legend>User</legend>
+
+							<div class="form-group">
+								<label for="user_username">Username</label>
+								<input type="text" class="form-control" name="user_username" id="user_username" value="<%= session ? session.username : '' %>">
+							</div>
+							<div class="form-group">
+								<label for="user_password">Password</label>
+								<input type="password" class="form-control" name="user_password" id="user_password">
+							</div>
+						</fieldset>
+
+						<fieldset class="thread-fields">
+							<legend>Thread</legend>
+
+							<div class="form-group">
+								<label for="thread_title">Title</label>
+								<input type="text" class="form-control" name="thread_title" id="thread_title" value="Match Thread: <%= format.teams(lineup.teams) %>">
+							</div>
+
+							<div class="form-group">
+								<label for="thread_subreddit">Subreddit</label>
+								<input type="text" class="form-control" name="thread_subreddit" id="thread_subreddit" value="soccer">
+							</div>
+
+							<div class="row">
+								<div class="col-md-3 thread-captcha">
+									<img src="<%= captcha.url %>">
+								</div>
+								<div class="col-md-9">
+									<div class="form-group">
+										<label for="thread_captcha_solution">Captcha</label>
+										<input type="text" class="form-control" name="thread_captcha_solution" id="thread_captcha_solution">
+										<input type="hidden" name="thread_captcha_id" value="<%= captcha.id %>">
+									</div>
+								</div>
+							</div>
+
+							<label class="event-view-label">Event view</label>
+
+							<div class="row">
+								<div class="col-md-6">
+									<div class="radio">
+										<label>
+											<input type="radio" name="view" value="simple"
+												onchange="window.reload()" <%- form.checked(query.view.simple) %>>
+											Simple text events
+										</label>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="radio">
+										<label>
+											<input type="radio" name="view" value="reddit"
+												onchange="window.reload()" <%- form.checked(query.view.reddit) %>>
+											Reddit styled events
+										</label>
+									</div>
+								</div>
+							</div>
+
+							<label class="exclude-events-label">Exclude events</label>
+
+							<%{ './_exclude' }%>
+						</fieldset>
+
+						<div class="actions">
+							<input type="submit" class="btn btn-primary" value="Create">
+						</div>
+					</div>
+
+					<div class="col-md-6">
+						<iframe id="thread-content" src="/matches/<%= match.id %>.md" frameborder="0"></iframe>
+					</div>
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

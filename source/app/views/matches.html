@@ -6,12 +6,8 @@
 		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
 		<style type="text/css">
-			.matches-create .panel-body {
-				padding-top: 5px;
-				padding-bottom: 5px;
-			}
-			.matches-create legend {
-				font-size: 18px;
+			.actions {
+				margin-top: 20px;
 			}
 
 			.matches {
@@ -49,63 +45,60 @@
 			</div>
 
 			<form action="/matches" method="POST" role="form" class="form-horizontal matches-create">
-				<div class="panel panel-default">
-					<div class="panel-body">
-						<div class="row">
-							<div class="col-md-6">
-								<fieldset>
-									<legend>Lineup</legend>
+				<div class="row">
+					<div class="col-md-6">
+						<fieldset>
+							<legend>Lineup</legend>
 
-									<div class="form-group">
-										<label class="col-md-3 control-label" for="lineup_provider">Provider</label>
-										<div class="col-md-8">
-											<select class="form-control" name="lineup_provider" id="lineup_provider">
-												<% lineups.forEach(function(name) { %>
-													<option value="<%= name %>"><%= name %></option>
-												<% }) %>
-											</select>
-										</div>
-									</div>
-
-									<div class="form-group">
-										<label class="col-md-3 control-label" for="lineup_url">URL</label>
-										<div class="col-md-8">
-											<input class="form-control" type="text" name="lineup_url" id="lineup_url">
-										</div>
-									</div>
-								</fieldset>
+							<div class="form-group">
+								<label class="col-md-3 control-label" for="lineup_provider">Provider</label>
+								<div class="col-md-8">
+									<select class="form-control" name="lineup_provider" id="lineup_provider">
+										<% lineups.forEach(function(name) { %>
+											<option value="<%= name %>"><%= name %></option>
+										<% }) %>
+									</select>
+								</div>
 							</div>
 
-							<div class="col-md-6">
-								<fieldset>
-									<legend>Feed</legend>
-
-									<div class="form-group">
-										<label class="col-md-3 control-label" for="feed_provider">Provider</label>
-										<div class="col-md-8">
-											<select class="form-control" name="feed_provider" id="feed_provider">
-												<% feeds.forEach(function(name) { %>
-													<option value="<%= name %>"><%= name %></option>
-												<% }) %>
-											</select>
-										</div>
-									</div>
-
-									<div class="form-group">
-										<label class="col-md-3 control-label" for="feed_url">URL</label>
-										<div class="col-md-8">
-											<input class="form-control" type="text" name="feed_url" id="feed_url">
-										</div>
-									</div>
-								</fieldset>
+							<div class="form-group">
+								<label class="col-md-3 control-label" for="lineup_url">URL</label>
+								<div class="col-md-8">
+									<input class="form-control" type="text" name="lineup_url" id="lineup_url">
+								</div>
 							</div>
-						</div>
+						</fieldset>
+					</div>
 
+					<div class="col-md-6">
+						<fieldset>
+							<legend>Feed</legend>
+
+							<div class="form-group">
+								<label class="col-md-3 control-label" for="feed_provider">Provider</label>
+								<div class="col-md-8">
+									<select class="form-control" name="feed_provider" id="feed_provider">
+										<% feeds.forEach(function(name) { %>
+											<option value="<%= name %>"><%= name %></option>
+										<% }) %>
+									</select>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-md-3 control-label" for="feed_url">URL</label>
+								<div class="col-md-8">
+									<input class="form-control" type="text" name="feed_url" id="feed_url">
+								</div>
+							</div>
+						</fieldset>
 					</div>
 				</div>
 
-				<input type="submit" class="btn btn-primary" value="Create match">
-				<input type="reset" class="btn btn-default" value="Clear">
+				<div class="actions">
+					<input type="submit" class="btn btn-primary" value="Create match">
+					<input type="reset" class="btn btn-default" value="Clear">
+				</div>
 			</form>
 
 			<table class="table table-hover matches">

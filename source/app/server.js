@@ -10,7 +10,10 @@ var helpers = require('./helpers');
 var markdown = require('./markdown');
 var reddit = require('./reddit');
 
-var PORT = 10101;
+var config = {
+	captcha: process.argv.indexOf('--no-captcha') === -1,
+	port: 10101
+};
 
 var app = root();
 
@@ -28,7 +31,7 @@ var addMatch = function(options) {
 
 	game.options = options;
 	game.id = matches.length;
-	game.threads = [];
+	game.threads = options.threads || [];
 
 	game.on('error', function(err) {
 		game.error = err;
@@ -171,10 +174,7 @@ app.get('/matches/reddit/{id}', function(request, response) {
 	request.match(function(match) {
 		var session = request.session;
 
-		reddit.post('/api/new_captcha', function(err, captcha) {
-			if(err) return response.error(500, err);
-
-			var id = captcha.json.data.iden;
+		var oncaptcha = function(id) {
 			var captcha = { url: reddit.url('/captcha/' + id), id: id };
 			var query = { view: { reddit: true }, exclude: { comment: true } };
 
@@ -185,6 +185,13 @@ app.get('/matches/reddit/{id}', function(request, response) {
 				session: session,
 				captcha: captcha
 			});
+		};
+
+		if(!config.captcha) return oncaptcha(null);
+
+		reddit.post('/api/new_captcha', function(err, captcha) {
+			if(err) return response.error(500, err);
+			oncaptcha(captcha.json.data.iden);
 		});
 	});
 });
@@ -222,8 +229,13 @@ app.post('/matches/reddit/{id}', function(request, response) {
 				}, function(err, result) {
 					if(err) return response.error(400, err);
 
-					match.threads.push(result.json.data);
-					response.redirect('/matches/' + match.id);
+					result = result.json.data;
+					result.title = data.thread_title;
+					result.subreddit = data.thread_subreddit;
+					result.username = session.username;
+
+					match.threads.push(result);
+					response.redirect('/matches/reddit/' + match.id);
 				});
 			});
 		};
@@ -252,8 +264,8 @@ app.error(function(request, response, err) {
 	response.render('./error', { error: err });
 });
 
-app.listen(PORT, function() {
-	console.log('Server listening on port ' + PORT);
+app.listen(config.port, function() {
+	console.log('Server listening on port ' + config.port);
 });
 
 try {

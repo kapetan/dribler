@@ -4,6 +4,7 @@
 		<title>Dribler - <%= format.teams(lineup.teams) %></title>
 
 		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/public/app.css">
 
 		<style type="text/css">
 			iframe {
@@ -13,6 +14,19 @@
 
 				width: 100%;
 				margin-bottom: 20px;
+			}
+
+			.threads {
+				border: 1px solid #ddd;
+			}
+			.threads .thread-title {
+				width: 50%;
+			}
+			.threads .thread-username {
+				width: 25%;
+			}
+			.threads .thread-subreddit {
+				width: 25%;
 			}
 
 			.thread-fields {
@@ -67,7 +81,7 @@
 					iframe.style.height = height + 'px';
 				};
 
-				window.onload = function() {
+				window.onready = function() {
 					resize();
 					reload();
 				};
@@ -77,11 +91,27 @@
 			}());
 		</script>
 	</head>
-	<body onload="window.onload()">
+	<body onload="window.onready()">
 		<div class="container">
+			<%{ './_tabs' { active: 'reddit', iif: iif, match: match } }%>
+
 			<div class="page-header">
 				<h1><%= format.teams(lineup.teams) %></h1>
 			</div>
+
+			<% if(match.threads.length) { %>
+				<table class="table threads">
+					<tbody>
+						<% match.threads.forEach(function(thread) { %>
+							<tr class="active">
+								<td class="thread-title"><a target="_blank" href="<%= thread.url %>"><%= thread.title %></a></td>
+								<td class="thread-username text-right"><%= thread.username %></td>
+								<td class="thread-subreddit text-right">/r/<%= thread.subreddit %></td>
+							</tr>
+						<% }) %>
+					</tbody>
+				</table>
+			<% } %>
 
 			<form action="/matches/reddit/<%= match.id %>" method="POST" role="form">
 				<div class="row">
@@ -114,7 +144,7 @@
 
 							<div class="row">
 								<div class="col-md-3 thread-captcha">
-									<img src="<%= captcha.url %>">
+									<img src="<%= iif(captcha.id, captcha.url) %>">
 								</div>
 								<div class="col-md-9">
 									<div class="form-group">

@@ -1,0 +1,11 @@
+<ul class="nav nav-tabs match-navigation">
+	<li class="<%= iif(active === 'home', 'active') %>"><a href="/matches/<%= match.id %>">Home</a></li>
+	<li class="<%= iif(active === 'md', 'active') %>"><a href="/matches/preview/<%= match.id %>.md">Markdown</a></li>
+	<li class="<%= iif(active === 'html', 'active') %>"><a href="/matches/preview/<%= match.id %>.html">HTML</a></li>
+	<li class="<%= iif(active === 'reddit', 'active') %>">
+		<a href="/matches/reddit/<%= match.id %>">
+			Reddit
+			<span class="<%= iif(!match.threads.length, 'hidden') %> label label-info thread-count"><%= match.threads.length %></span>
+		</a>
+	</li>
+</ul>

@@ -4,13 +4,9 @@
 		<title>Dribler - <%= format.teams(lineup.teams) %></title>
 
 		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/public/app.css">
 
 		<style type="text/css">
-			.nav {
-				margin-top: 30px;
-				margin-bottom: 20px;
-			}
-
 			iframe {
 				border: none;
 				margin: 0;
@@ -39,11 +35,7 @@
 	</head>
 	<body>
 		<div class="container">
-			<ul class="nav nav-tabs">
-				<li><a href="/matches/<%= match.id %>">Default</a></li>
-				<li class="<%= extension === 'md' ? 'active' : '' %>"><a href="/matches/preview/<%= match.id %>.md<%= search %>">Markdown</a></li>
-				<li class="<%= extension === 'html' ? 'active' : '' %>"><a href="/matches/preview/<%= match.id %>.html<%= search %>">HTML</a></li>
-			</ul>
+			<%{ '../_tabs' { active: extension, iif: iif, match: match } }%>
 
 			<form id="query" method="GET" role="form" class="events-filter">
 				<div class="row">

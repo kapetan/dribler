@@ -111,7 +111,7 @@
 				</thead>
 				<tbody>
 					<% matches.forEach(function(match) { %>
-						<tr data-href="/matches/<%= match.id %>" onclick="window.href(this)" class="<%= match.error ? 'danger' : '' %>">
+						<tr data-href="/matches/<%= match.id %>" onclick="window.href(this)" class="<%= iif(match.error, 'danger') %>">
 							<td class="match-latest"><strong><%= format.time(match.latest && match.latest.time) %></strong></td>
 							<td class="match-teams"><%= match.lineup ? format.teams(match.lineup.teams) : '' %></td>
 							<td class="match-providers text-right"><%= match.options.lineup.provider %>/<%= match.options.feed.provider %></td>

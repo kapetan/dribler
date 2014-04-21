@@ -74,6 +74,10 @@ var contextual = function(type) {
 	}[type] || '');
 };
 
+var iif = function(condition, t, f) {
+	return condition ? t : (f || '');
+};
+
 var toHTML = function(obj) {
 	return json(obj);
 };
@@ -89,6 +93,7 @@ var extend = function(locals) {
 	assign(locals, 'string', string);
 	assign(locals, 'form', form);
 	assign(locals, 'contextual', contextual);
+	assign(locals, 'iif', iif);
 	assign(locals, 'toHTML', toHTML);
 
 	return locals;

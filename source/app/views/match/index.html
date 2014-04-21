@@ -5,12 +5,9 @@
 
 		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="/public/json-markup.css">
+		<link rel="stylesheet" type="text/css" href="/public/app.css">
 
 		<style type="text/css">
-			.nav {
-				margin-top: 30px;
-			}
-
 			.table-hover > tbody > tr.no-hover:hover > td,
 			.table-hover > tbody > tr.no-hover:hover > th {
 				background-color: transparent;
@@ -34,6 +31,7 @@
 				margin-bottom: 0;
 			}
 			.events .json-markup-string {
+				white-space: normal;
 				max-width: 700px;
 				display: inline-block;
 			}
@@ -75,24 +73,22 @@
 		<script type="text/javascript">
 			(function() {
 				var viewport = function() {
-					var body = document.body;
 					var html = document.documentElement;
 
 					return {
 						height: html.clientHeight,
 						width: html.clientWidth,
-						top: body.scrollTop,
-						left: body.scrollLeft
+						top: window.pageYOffset,
+						left: window.pageXOffset
 					};
 				};
 
 				var rectangle = function(element) {
-					var body = document.body;
 					var rect = element.getBoundingClientRect();
 
 					var result = {
-						top: rect.top + body.scrollTop,
-						left: rect.left + body.scrollLeft,
+						top: rect.top + window.pageYOffset,
+						left: rect.left + window.pageXOffset,
 						width: rect.width,
 						height: rect.height
 					};
@@ -143,11 +139,7 @@
 	</head>
 	<body>
 		<div class="container">
-			<ul class="nav nav-tabs">
-				<li class="active"><a href="/matches/<%= match.id %>">Default</a></li>
-				<li><a href="/matches/preview/<%= match.id %>.md">Markdown</a></li>
-				<li><a href="/matches/preview/<%= match.id %>.html">HTML</a></li>
-			</ul>
+			<%{ '../_tabs' { active: 'home', iif: iif, match: match } }%>
 
 			<div class="page-header">
 				<h1><%= format.teams(lineup.teams) %></h1>

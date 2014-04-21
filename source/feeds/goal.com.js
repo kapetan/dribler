@@ -75,6 +75,10 @@ var parse = function(html, lineup) {
 			extra.subtype = 'own_goal';
 			type = 'goal';
 		}
+		if(type === 'penalty_goal') {
+			extra.subtype = 'penalty';
+			type = 'goal';
+		}
 		if(type === 'yellow/red') {
 			extra.subtype = 'yellow_card';
 			type = 'red_card';

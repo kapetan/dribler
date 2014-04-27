@@ -4,8 +4,8 @@ var helpers = require('./helpers');
 
 var events = {};
 
-events.simple = require('./views/match_md/events/simple.json');
-events.reddit = require('./views/match_md/events/reddit.json');
+events.simple = require('./views/match/markdown/events/simple.json');
+events.reddit = require('./views/match/markdown/events/reddit.json');
 
 var comment = function(event) {
 	return event.data;

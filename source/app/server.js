@@ -108,7 +108,7 @@ app.get('/matches', function(request, response) {
 app.get('/matches/{id}.md', function(request, response) {
 	request.match(function(match, events) {
 		response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-		response.render('./match_md/index.md', {
+		response.render('./match/markdown/index.md', {
 			match: match,
 			lineup: match.lineup,
 			events: events,
@@ -126,20 +126,20 @@ app.get('/matches/{id}.html', function(request, response) {
 			markdown: markdown(request.query.view)
 		};
 
-		app.views.render('./match_md/index.md', helpers(locals), function(err, content) {
+		app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
 			if(err) return response.error(500, err);
 
 			content = marked(content);
 			locals.content = content;
 
-			response.render('./match_md/index.html', locals);
+			response.render('./match/preview/base', locals);
 		});
 	});
 });
 
 app.get('/matches/{id}', function(request, response) {
 	request.match(function(match, events) {
-		response.render('./match', { match: match, lineup: match.lineup, events: events });
+		response.render('./match/main', { match: match, lineup: match.lineup, events: events });
 	});
 });
 
@@ -160,7 +160,7 @@ app.get('/matches/preview/{id}.{extension}', function(request, response) {
 		var search = request.url.split('?')[1];
 		search = search ? ('?' + search) : '';
 
-		response.render('./match_md/preview', {
+		response.render('./match/preview', {
 			match: match,
 			lineup: match.lineup,
 			extension: request.params.extension,
@@ -178,7 +178,7 @@ app.get('/matches/reddit/{id}', function(request, response) {
 			var captcha = { url: reddit.url('/captcha/' + id), id: id };
 			var query = { view: { reddit: true }, exclude: { comment: true } };
 
-			response.render('./reddit', {
+			response.render('./match/reddit', {
 				match: match,
 				lineup: match.lineup,
 				query: query,
@@ -215,7 +215,7 @@ app.post('/matches/reddit/{id}', function(request, response) {
 				markdown: markdown(data.view)
 			};
 
-			app.views.render('./match_md/index.md', helpers(locals), function(err, content) {
+			app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
 				if(err) return response.error(500, err);
 
 				reddit.post('/api/submit', {

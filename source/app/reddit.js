@@ -105,15 +105,6 @@ var login = function(credentials, callback) {
 	that.post('/api/login', data, function(err, user) {
 		if(err) return callback(err);
 
-		var error = function(message) {
-			message = util.format('%s: %s', message, JSON.stringify(user));
-			callback(new Error(message));
-		};
-
-		if(!user.json) return error('Invalid response');
-		if(!user.json.data) return error('Invalid response');
-		if(user.errors && user.errors.length) return error('Response error');
-
 		that.session = user.json.data;
 		that.session.username = credentials.username;
 

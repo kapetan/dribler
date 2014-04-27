@@ -2,6 +2,7 @@
   "name": "dribler",
   "version": "0.0.1",
   "description": "Soccer feeds",
+  "main": "./source/app/server.js",
   "dependencies": {
     "request": "~2.34.0",
     "cheerio": "~0.13.1",

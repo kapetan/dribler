@@ -1,5 +1,6 @@
 var os = require('os');
 var path = require('path');
+var util = require('util');
 
 var flatfile = require('flat-file-db');
 var hat = require('hat');
@@ -10,6 +11,16 @@ var db = flatfile.sync(path.join(os.tmpdir(), 'dribler.db'));
 var matches = {};
 
 var noop = function() {};
+
+var error = function(callback, property) {
+	var message = util.format('Invalid %s', property);
+	var err = new Error(message);
+
+	err.validation = true;
+	callback(err);
+
+	return err;
+};
 
 var find = function(arr, fn) {
 	for(var i = 0; i < arr.length; i++) {
@@ -87,7 +98,18 @@ var allMatches = function() {
 	});
 };
 
+var validateThread = function(data, callback) {
+	if(!data.captcha) return error(callback, 'captcha');
+	if(!data.iden) return error(callback, 'captcha id');
+	if(!data.sr) return error(callback, 'subreddit');
+	if(!data.text) return error(callback, 'text');
+	if(!data.title) return error(callback, 'title');
+};
+
 var createThread = function(reddit, data, callback) {
+	if(validateThread(data, callback)) return;
+	if(!reddit.session) return error(callback, 'reddit session');
+
 	data.kind = 'self';
 	data.sendreplies = true;
 

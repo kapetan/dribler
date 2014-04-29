@@ -10,6 +10,8 @@ var helpers = require('./helpers');
 var markdown = require('./markdown');
 var reddit = require('./reddit');
 
+var matches = require('./matches');
+
 var config = {
 	captcha: process.argv.indexOf('--no-captcha') === -1,
 	port: 10101
@@ -23,31 +25,6 @@ app.use(require('./middleware/render'), {
 	basedir: path.join(__dirname, 'views'),
 	helpers: helpers
 });
-
-var matches = [];
-
-var addMatch = function(options) {
-	var game = match(options);
-
-	game.options = options;
-	game.id = matches.length;
-	game.threads = options.threads || [];
-
-	game.on('error', function(err) {
-		game.error = err;
-	});
-	game.on('data', function(event) {
-		game.latest = event;
-	});
-
-	matches.push(game);
-	return game;
-};
-
-var getMatch = function(id) {
-	id = parseInt(id, 10);
-	return matches[id];
-};
 
 var parseQuery = function(params) {
 	if(!params) return { _length: 0 };
@@ -86,9 +63,9 @@ var eventQuery = function(query) {
 };
 
 app.use('request.match', function(fn) {
-	var match = getMatch(this.params.id);
+	var match = matches.get(this.params.id);
 
-	if(!match) return this.response.error(400, new Error('Invalid id'));
+	if(!match) return this.response.error(404, new Error('Invalid id'));
 	if(match.error) return this.response.render('./error', { error: match.error });
 
 	var query = eventQuery(this.query);
@@ -99,7 +76,7 @@ app.use('request.match', function(fn) {
 
 app.get('/matches', function(request, response) {
 	response.render('./matches', {
-		matches: matches,
+		matches: matches.all(),
 		feeds: Object.keys(match.feeds),
 		lineups: Object.keys(match.lineups)
 	});
@@ -150,7 +127,7 @@ app.post('/matches', function(request, response) {
 			feed: { provider: body.feed_provider, url: body.feed_url }
 		};
 
-		addMatch(options);
+		matches.create(options);
 		response.redirect('/matches');
 	});
 });
@@ -197,8 +174,8 @@ app.get('/matches/reddit/{id}', function(request, response) {
 });
 
 app.post('/matches/reddit/{id}', function(request, response) {
-	var match = getMatch(request.params.id);
-	if(!match) return response.error(400, new Error('Invalid id'));
+	var match = matches.get(request.params.id);
+	if(!match) return response.error(404, new Error('Invalid id'));
 
 	request.on('form', function(data) {
 		var session = request.session;
@@ -218,23 +195,14 @@ app.post('/matches/reddit/{id}', function(request, response) {
 			app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
 				if(err) return response.error(500, err);
 
-				reddit.post('/api/submit', {
+				match.createThread(reddit, {
 					captcha: data.thread_captcha_solution,
 					iden: data.thread_captcha_id,
-					kind: 'self',
-					sendreplies: true,
 					sr: data.thread_subreddit,
 					text: content,
 					title: data.thread_title
-				}, function(err, result) {
-					if(err) return response.error(400, err);
-
-					result = result.json.data;
-					result.title = data.thread_title;
-					result.subreddit = data.thread_subreddit;
-					result.username = session.username;
-
-					match.threads.push(result);
+				}, function(err) {
+					if(err) return response.error(500, err);
 					response.redirect('/matches/reddit/' + match.id);
 				});
 			});
@@ -267,8 +235,3 @@ app.error(function(request, response, err) {
 app.listen(config.port, function() {
 	console.log('Server listening on port ' + config.port);
 });
-
-try {
-	// Load test data
-	require('./data').forEach(addMatch);
-} catch(err) {}

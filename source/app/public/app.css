@@ -5,3 +5,12 @@
 .match-navigation .thread-count {
 	margin-left: 5px;
 }
+.match-navigation .back {
+	-moz-border-radius: 0;
+	-webkit-border-radius: 0;
+	border-radius: 0;
+}
+.match-navigation .back:hover {
+	background-color: transparent;
+	border-color: transparent;
+}

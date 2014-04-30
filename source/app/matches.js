@@ -140,7 +140,6 @@ db.keys().forEach(function(id) {
 	matches[match.id] = match;
 });
 
-exports.db = db;
 exports.create = createMatch;
 exports.get = getMatch;
 exports.all = allMatches;

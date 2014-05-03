@@ -23,8 +23,12 @@ Object.keys(events).forEach(function(key) {
 	});
 });
 
+var view = function(name) {
+	return events[name] ? name : 'simple';
+};
+
 var renderEvent = function(name, event) {
-	var templates = events[name] || events.simple;
+	var templates = events[view(name)];
 	var type = event.type;
 
 	if(type === 'goal') {
@@ -43,3 +47,5 @@ module.exports = function(name) {
 		return renderEvent(name, event);
 	};
 };
+
+module.exports.view = view;

@@ -20,13 +20,26 @@
 				border: 1px solid #ddd;
 			}
 			.threads .thread-title {
-				width: 50%;
+				width: 45%;
 			}
 			.threads .thread-username {
-				width: 25%;
+				width: 10%;
 			}
 			.threads .thread-subreddit {
+				text-align: left;
+				width: 10%;
+			}
+			.threads .thread-timestamp {
+				font-size: 11px;
+				vertical-align: middle;
 				width: 25%;
+			}
+			.threads .thread-timestamp .created {
+				margin-right: 5px;
+			}
+			.threads .thread-actions {
+				width: 10%;
+				text-align: right;
 			}
 
 			.thread-fields {
@@ -107,6 +120,18 @@
 								<td class="thread-title"><a target="_blank" href="<%= thread.url %>"><%= thread.title %></a></td>
 								<td class="thread-username text-right"><%= thread.username %></td>
 								<td class="thread-subreddit text-right">/r/<%= thread.subreddit %></td>
+								<td class="thread-timestamp">
+									<span class="created">created <%= format.timestamp(thread.created) %></span>
+									<span class="updated text-success">(updated <%= format.timestamp(thread.updated) %>)</span>
+								</td>
+								<td class="thread-actions">
+									<form class="form-link" action="/matches/reddit/<%= match.id %>/<%= thread.id %>/update" method="POST">
+										<input type="hidden" name="view" value="<%= thread.events.view %>">
+										<input type="hidden" name="exclude" value="<%= form.exclude(thread.events.exclude) %>">
+
+										<button class="btn-link" type="submit">Update</button>
+									</form>
+								</td>
 							</tr>
 						<% }) %>
 					</tbody>
@@ -162,7 +187,7 @@
 									<div class="radio">
 										<label>
 											<input type="radio" name="view" value="simple"
-												onchange="window.reload()" <%- form.checked(query.view.simple) %>>
+												onchange="window.reload()" <%- form.checked(query.view === 'simple') %>>
 											Simple text events
 										</label>
 									</div>
@@ -171,7 +196,7 @@
 									<div class="radio">
 										<label>
 											<input type="radio" name="view" value="reddit"
-												onchange="window.reload()" <%- form.checked(query.view.reddit) %>>
+												onchange="window.reload()" <%- form.checked(query.view === 'reddit') %>>
 											Reddit styled events
 										</label>
 									</div>

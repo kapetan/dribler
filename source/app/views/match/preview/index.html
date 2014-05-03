@@ -46,14 +46,14 @@
 							<div class="radio">
 								<label>
 									<input type="radio" name="view" value="simple"
-										onchange="window.reload()" <%- form.checked(query.view.simple) %>>
+										onchange="window.reload()" <%- form.checked(query.view === 'simple') %>>
 									Simple text events
 								</label>
 							</div>
 							<div class="radio">
 								<label>
 									<input type="radio" name="view" value="reddit"
-										onchange="window.reload()" <%- form.checked(query.view.reddit) %>>
+										onchange="window.reload()" <%- form.checked(query.view === 'reddit') %>>
 									Reddit styled events
 								</label>
 							</div>

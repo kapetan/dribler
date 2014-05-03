@@ -1,6 +1,7 @@
 var util = require('util');
 var json = require('json-markup');
 var traverse = require('traverse');
+var moment = require('moment');
 
 var format = {};
 var string = {};
@@ -32,6 +33,10 @@ format.teams = function(team, team2) {
 	return team.join(' vs. ');
 };
 
+format.timestamp = function(timestamp) {
+	return moment.duration(timestamp - Date.now()).humanize(true);
+};
+
 string.capitalize = function(str) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 };
@@ -61,6 +66,10 @@ string.format = function(str, obj) {
 
 form.checked = function(bool) {
 	return bool ? 'checked="checked"' : '';
+};
+
+form.exclude = function(exclude) {
+	return Object.keys(exclude).join(',');
 };
 
 var contextual = function(type) {

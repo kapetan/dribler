@@ -44,10 +44,7 @@ var parseQuery = function(params) {
 var eventQuery = function(query) {
 	var exclude = parseQuery(query.exclude);
 	var filter = function() { return true; };
-	var view = {};
-
-	view.reddit = query.view === 'reddit';
-	view.simple = query.view === 'simple' || !view.reddit;
+	var view = markdown.view(query.view);
 
 	if(exclude._length) {
 		filter = function(event) {
@@ -83,24 +80,24 @@ app.get('/matches', function(request, response) {
 });
 
 app.get('/matches/{id}.md', function(request, response) {
-	request.match(function(match, events) {
+	request.match(function(match, events, query) {
 		response.setHeader('Content-Type', 'text/plain; charset=utf-8');
 		response.render('./match/markdown/index.md', {
 			match: match,
 			lineup: match.lineup,
 			events: events,
-			markdown: markdown(request.query.view)
+			markdown: markdown(query.view)
 		});
 	});
 });
 
 app.get('/matches/{id}.html', function(request, response) {
-	request.match(function(match, events) {
+	request.match(function(match, events, query) {
 		var locals = {
 			match: match,
 			lineup: match.lineup,
 			events: events,
-			markdown: markdown(request.query.view)
+			markdown: markdown(query.view)
 		};
 
 		app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
@@ -153,7 +150,7 @@ app.get('/matches/reddit/{id}', function(request, response) {
 
 		var oncaptcha = function(id) {
 			var captcha = { url: reddit.url('/captcha/' + id), id: id };
-			var query = { view: { reddit: true }, exclude: { comment: true } };
+			var query = { view: 'reddit', exclude: { comment: true } };
 
 			response.render('./match/reddit', {
 				match: match,
@@ -183,8 +180,6 @@ app.post('/matches/reddit/{id}', function(request, response) {
 		var events = match.events.filter(query.filter);
 
 		var onsession = function(reddit) {
-			response.session = reddit.session;
-
 			var locals = {
 				match: match,
 				lineup: match.lineup,
@@ -203,6 +198,8 @@ app.post('/matches/reddit/{id}', function(request, response) {
 					title: data.thread_title
 				}, function(err) {
 					if(err) return response.error(500, err);
+
+					response.session = reddit.session;
 					response.redirect('/matches/reddit/' + match.id);
 				});
 			});
@@ -218,6 +215,35 @@ app.post('/matches/reddit/{id}', function(request, response) {
 		} else {
 			response.error(400, new Error('No reddit session'));
 		}
+	});
+});
+
+app.post('/matches/reddit/{id}/{thread}/update', function(request, response) {
+	var match = matches.get(request.params.id);
+	if(!match) return response.error(404, new Error('Invalid id'));
+
+	request.on('form', function(data) {
+		var session = request.session;
+		var query = eventQuery(data);
+		var events = match.events.filter(query.filter);
+
+		if(!session) return response.error(400, new Error('No reddit session'));
+
+		var locals = {
+			match: match,
+			lineup: match.lineup,
+			events: events,
+			markdown: markdown(data.view)
+		};
+
+		app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
+			if(err) return response.error(500, err);
+
+			match.updateThread(request.params.thread, reddit(session), content, function(err) {
+				if(err) return response.error(500, err);
+				response.redirect('/matches/reddit/' + match.id);
+			});
+		});
 	});
 });
 

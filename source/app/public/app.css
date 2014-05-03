@@ -14,3 +14,13 @@
 	background-color: transparent;
 	border-color: transparent;
 }
+
+.form-link {
+	padding: 0;
+	margin: 0;
+}
+.form-link .btn-link {
+	padding: 0;
+	border: none;
+	outline: none;
+}

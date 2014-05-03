@@ -39,7 +39,7 @@ var decorate = function(match, data) {
 
 	match.getThread = function(id) {
 		return find(this.threads, function(thread) {
-			return thread.id = id;
+			return thread.id === id;
 		});
 	};
 
@@ -49,6 +49,9 @@ var decorate = function(match, data) {
 		createThread(reddit, data, function(err, thread) {
 			if(err) return callback(err);
 
+			thread.updated = Date.now();
+			thread.created = thread.updated;
+
 			self.threads.push(thread);
 			persistMatch(self, callback);
 		});
@@ -57,10 +60,17 @@ var decorate = function(match, data) {
 	match.updateThread = function(id, reddit, text, callback) {
 		callback = callback || noop;
 
-		var thread = this.getThread();
+		var self = this;
+		var thread = this.getThread(id);
+
 		if(!thread) return callback(new Error('Invalid thread id'));
 
-		updateThread(thread.name, reddit, text, callback);
+		updateThread(thread, reddit, text, function(err) {
+			if(err) return callback(err);
+
+			thread.updated = Date.now();
+			persistMatch(self, callback);
+		});
 	};
 
 	match.on('error', function(err) {
@@ -71,7 +81,12 @@ var decorate = function(match, data) {
 };
 
 var persistMatch = function(match, callback) {
-	db.put(match.id, match.data, callback);
+	var data = match.data;
+
+	data.updated = Date.now();
+	data.created = data.created || data.updated;
+
+	db.put(data.id, data, callback);
 };
 
 var createMatch = function(data) {
@@ -128,8 +143,11 @@ var createThread = function(reddit, data, callback) {
 	});
 };
 
-var updateThread = function(name, reddit, text, callback) {
-	reddit.post('/api/editusertext', { text: text, thing_id: name }, callback);
+var updateThread = function(thread, reddit, text, callback) {
+	if(!reddit.session) return error(callback, 'reddit session');
+	if(reddit.session.username !== thread.username) return error(callback, 'username');
+
+	reddit.post('/api/editusertext', { text: text, thing_id: thread.name }, callback);
 };
 
 db.keys().forEach(function(id) {

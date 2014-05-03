@@ -20,10 +20,18 @@
 				width: 10%;
 			}
 			.matches .match-teams {
-				width: 70%;
+				width: 50%;
+			}
+			.matches .match-timestamp {
+				font-size: 11px;
+				vertical-align: middle;
+				width: 25%;
+			}
+			.matches .match-timestamp .created {
+				margin-right: 5px;
 			}
 			.matches .match-providers {
-				width: 20%;
+				width: 15%;
 			}
 		</style>
 
@@ -106,6 +114,7 @@
 					<tr>
 						<th>Latest</th>
 						<th>Teams</th>
+						<th></th>
 						<th class="text-right">Lineup/Feed</th>
 					</tr>
 				</thead>
@@ -114,6 +123,10 @@
 						<tr data-href="/matches/<%= match.id %>" onclick="window.href(this)" class="<%= iif(match.error, 'danger') %>">
 							<td class="match-latest"><strong><%= format.time(match.latest && match.latest.time) %></strong></td>
 							<td class="match-teams"><%= match.lineup ? format.teams(match.lineup.teams) : '' %></td>
+							<td class="match-timestamp">
+								<span class="created">created <%= format.timestamp(match.data.created) %></span>
+								<span class="updated text-success">(updated <%= format.timestamp(match.data.updated) %>)</span>
+							</td>
 							<td class="match-providers text-right"><%= match.data.lineup.provider %>/<%= match.data.feed.provider %></td>
 						</tr>
 					<% }) %>

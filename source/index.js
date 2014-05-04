@@ -20,7 +20,7 @@ var validate = function(options) {
 };
 
 var MatchStream = function() {
-	stream.Transform.call(this, { objectMode: true, hightWaterMark: 16 });
+	stream.Transform.call(this, { objectMode: true, highWaterMark: 16 });
 
 	this.lineup = null;
 	this.events = [];

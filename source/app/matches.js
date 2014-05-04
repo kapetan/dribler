@@ -77,6 +77,8 @@ var decorate = function(match, data) {
 		match.error = err;
 	});
 
+	match.resume();
+
 	return match;
 };
 

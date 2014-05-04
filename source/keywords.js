@@ -43,7 +43,7 @@ var match = function(str) {
 
 var KeywordStream = function(lineup) {
 	if(!(this instanceof KeywordStream)) return new KeywordStream(lineup);
-	stream.Transform.call(this, { objectMode: true, hightWaterMark: 16 });
+	stream.Transform.call(this, { objectMode: true, highWaterMark: 16 });
 };
 
 util.inherits(KeywordStream, stream.Transform);

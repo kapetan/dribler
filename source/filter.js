@@ -5,7 +5,7 @@ var VALID_EVENTS = ['goal', 'yellow_card', 'red_card', 'substitution', 'comment'
 
 var FilterStream = function() {
 	if(!(this instanceof FilterStream)) return new FilterStream();
-	stream.Transform.call(this, { objectMode: true, hightWaterMark: 16 });
+	stream.Transform.call(this, { objectMode: true, highWaterMark: 16 });
 };
 
 util.inherits(FilterStream, stream.Transform);

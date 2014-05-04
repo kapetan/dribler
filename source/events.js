@@ -27,7 +27,7 @@ var toCompactJSON = function() {
 
 var EventStream = function(url, frequency) {
 	if(!(this instanceof EventStream)) return new EventStream(url, frequency);
-	stream.Readable.call(this, { objectMode: true, hightWaterMark: 16 });
+	stream.Readable.call(this, { objectMode: true, highWaterMark: 16 });
 
 	this._url = url;
 	this._frequency = frequency || DEFAULT_FREQUENCE;

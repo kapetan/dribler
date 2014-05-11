@@ -13,9 +13,22 @@ var reddit = require('./reddit');
 var matches = require('./matches');
 
 var config = {
-	captcha: process.argv.indexOf('--no-captcha') === -1,
+	reddit: process.argv.indexOf('--no-reddit') === -1,
 	port: 10101
 };
+
+if(!config.reddit) {
+	var jsonResponse = function() {
+		return { json: { data: {} } };
+	};
+
+	reddit = require('./reddit.mock')({
+		'POST /api/new_captcha': jsonResponse(),
+		'POST /api/submit': jsonResponse(),
+		'POST /api/editusertext': jsonResponse(),
+		'POST /api/login': jsonResponse()
+	});
+}
 
 var app = root();
 
@@ -25,6 +38,33 @@ app.use(require('./middleware/render'), {
 	basedir: path.join(__dirname, 'views'),
 	helpers: helpers
 });
+
+var ThreadPreview = function(match, query) {
+	this.match = match;
+	this.query = query;
+
+	this.events = match.events.filter(function(event) {
+		return !query.exclude.hasOwnProperty(event.type);
+	});
+
+	this.locals = helpers({
+		match: match,
+		lineup: match.lineup,
+		events: this.events,
+		markdown: markdown(query.view)
+	});
+};
+
+ThreadPreview.prototype.renderMarkdown = function(callback) {
+	app.views.render('./match/markdown/index.md', this.locals, callback);
+};
+
+ThreadPreview.prototype.renderHtml = function(callback) {
+	this.renderMarkdown(function(err, content) {
+		if(err) return callback(err);
+		callback(null, marked(content));
+	});
+};
 
 var parseQuery = function(params) {
 	if(!params) return { _length: 0 };
@@ -41,34 +81,30 @@ var parseQuery = function(params) {
 	}, { _length: 0 });
 };
 
-var eventQuery = function(query) {
-	var exclude = parseQuery(query.exclude);
-	var filter = function() { return true; };
-	var view = markdown.view(query.view);
-
-	if(exclude._length) {
-		filter = function(event) {
-			return !exclude.hasOwnProperty(event.type);
-		};
-	}
-
-	return {
-		exclude: exclude,
-		view: view,
-		filter: filter
-	};
-};
-
 app.use('request.match', function(fn) {
 	var match = matches.get(this.params.id);
 
 	if(!match) return this.response.error(404, new Error('Invalid id'));
 	if(match.error) return this.response.render('./error', { error: match.error });
 
-	var query = eventQuery(this.query);
-	var events = match.events.filter(query.filter);
+	var self = this;
+	var ondata = function(data) {
+		var preview = new ThreadPreview(match, {
+			exclude: parseQuery(data.exclude),
+			view: markdown.view(data.view)
+		});
 
-	fn(match, events, query);
+		fn(match, preview);
+	};
+
+	if(this.method === 'POST') {
+		this.on('form', function(data) {
+			self.body = data;
+			ondata(data);
+		});
+	} else {
+		ondata(this.query);
+	}
 });
 
 app.get('/matches', function(request, response) {
@@ -80,40 +116,30 @@ app.get('/matches', function(request, response) {
 });
 
 app.get('/matches/{id}.md', function(request, response) {
-	request.match(function(match, events, query) {
-		response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-		response.render('./match/markdown/index.md', {
-			match: match,
-			lineup: match.lineup,
-			events: events,
-			markdown: markdown(query.view)
+	request.match(function(match, preview) {
+		preview.renderMarkdown(function(err, content) {
+			if(err) return response.error(500, err);
+
+			response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+			response.send(content);
 		});
 	});
 });
 
 app.get('/matches/{id}.html', function(request, response) {
-	request.match(function(match, events, query) {
-		var locals = {
-			match: match,
-			lineup: match.lineup,
-			events: events,
-			markdown: markdown(query.view)
-		};
-
-		app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
+	request.match(function(match, preview) {
+		preview.renderHtml(function(err, content) {
 			if(err) return response.error(500, err);
 
-			content = marked(content);
-			locals.content = content;
-
-			response.render('./match/preview/base', locals);
+			preview.locals.content = content;
+			response.render('./match/preview/base', preview.locals);
 		});
 	});
 });
 
 app.get('/matches/{id}', function(request, response) {
-	request.match(function(match, events) {
-		response.render('./match/main', { match: match, lineup: match.lineup, events: events });
+	request.match(function(match, preview) {
+		response.render('./match/main', { match: match, lineup: match.lineup, events: preview.events });
 	});
 });
 
@@ -130,7 +156,7 @@ app.post('/matches', function(request, response) {
 });
 
 app.get('/matches/preview/{id}.{extension}', function(request, response) {
-	request.match(function(match, _, query) {
+	request.match(function(match, preview) {
 		var search = request.url.split('?')[1];
 		search = search ? ('?' + search) : '';
 
@@ -139,13 +165,13 @@ app.get('/matches/preview/{id}.{extension}', function(request, response) {
 			lineup: match.lineup,
 			extension: request.params.extension,
 			search: search,
-			query: query
+			query: preview.query
 		});
 	});
 });
 
 app.get('/matches/reddit/{id}', function(request, response) {
-	request.match(function(match) {
+	request.match(function(match, preview) {
 		var session = request.session;
 
 		var oncaptcha = function(id) {
@@ -161,8 +187,6 @@ app.get('/matches/reddit/{id}', function(request, response) {
 			});
 		};
 
-		if(!config.captcha) return oncaptcha(null);
-
 		reddit.post('/api/new_captcha', function(err, captcha) {
 			if(err) return response.error(500, err);
 			oncaptcha(captcha.json.data.iden);
@@ -171,23 +195,12 @@ app.get('/matches/reddit/{id}', function(request, response) {
 });
 
 app.post('/matches/reddit/{id}', function(request, response) {
-	var match = matches.get(request.params.id);
-	if(!match) return response.error(404, new Error('Invalid id'));
-
-	request.on('form', function(data) {
+	request.match(function(match, preview) {
 		var session = request.session;
-		var query = eventQuery(data);
-		var events = match.events.filter(query.filter);
+		var data = request.body;
 
 		var onsession = function(reddit) {
-			var locals = {
-				match: match,
-				lineup: match.lineup,
-				events: events,
-				markdown: markdown(data.view)
-			};
-
-			app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
+			preview.renderMarkdown(function(err, content) {
 				if(err) return response.error(500, err);
 
 				match.createThread(reddit, {
@@ -219,24 +232,11 @@ app.post('/matches/reddit/{id}', function(request, response) {
 });
 
 app.post('/matches/reddit/{id}/{thread}/update', function(request, response) {
-	var match = matches.get(request.params.id);
-	if(!match) return response.error(404, new Error('Invalid id'));
-
-	request.on('form', function(data) {
+	request.match(function(match, preview) {
 		var session = request.session;
-		var query = eventQuery(data);
-		var events = match.events.filter(query.filter);
-
 		if(!session) return response.error(400, new Error('No reddit session'));
 
-		var locals = {
-			match: match,
-			lineup: match.lineup,
-			events: events,
-			markdown: markdown(data.view)
-		};
-
-		app.views.render('./match/markdown/index.md', helpers(locals), function(err, content) {
+		preview.renderMarkdown(function(err, content) {
 			if(err) return response.error(500, err);
 
 			match.updateThread(request.params.thread, reddit(session), content, function(err) {

@@ -4,6 +4,7 @@
 		<title>Dribler - Matches</title>
 
 		<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/public/app.css">
 
 		<style type="text/css">
 			.actions {
@@ -12,6 +13,7 @@
 
 			.matches {
 				margin-top: 50px;
+				table-layout: fixed;
 			}
 			.matches tbody tr {
 				cursor: pointer;
@@ -23,12 +25,7 @@
 				width: 50%;
 			}
 			.matches .match-timestamp {
-				font-size: 11px;
-				vertical-align: middle;
 				width: 25%;
-			}
-			.matches .match-timestamp .created {
-				margin-right: 5px;
 			}
 			.matches .match-providers {
 				width: 15%;
@@ -112,10 +109,10 @@
 			<table class="table table-hover matches">
 				<thead>
 					<tr>
-						<th>Latest</th>
-						<th>Teams</th>
-						<th></th>
-						<th class="text-right">Lineup/Feed</th>
+						<th class="match-latest">Latest</th>
+						<th class="match-teams">Teams</th>
+						<th class="match-timestamp"></th>
+						<th class="match-providers text-right">Lineup/Feed</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -123,7 +120,7 @@
 						<tr data-href="/matches/<%= match.id %>" onclick="window.href(this)" class="<%= iif(match.error, 'danger') %>">
 							<td class="match-latest"><strong><%= format.time(match.latest && match.latest.time) %></strong></td>
 							<td class="match-teams"><%= match.lineup ? format.teams(match.lineup.teams) : '' %></td>
-							<td class="match-timestamp">
+							<td class="match-timestamp timestamp">
 								<span class="created">created <%= format.timestamp(match.data.created) %></span>
 								<span class="updated text-success">(updated <%= format.timestamp(match.data.updated) %>)</span>
 							</td>

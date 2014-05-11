@@ -24,3 +24,14 @@
 	border: none;
 	outline: none;
 }
+
+table > tbody > tr > td.timestamp {
+	font-size: 11px;
+	vertical-align: middle;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+table  > tbody > tr > td.timestamp .created {
+	margin-right: 5px;
+}

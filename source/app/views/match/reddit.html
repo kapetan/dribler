@@ -18,6 +18,7 @@
 
 			.threads {
 				border: 1px solid #ddd;
+				table-layout: fixed;
 			}
 			.threads .thread-title {
 				width: 45%;
@@ -30,12 +31,7 @@
 				width: 10%;
 			}
 			.threads .thread-timestamp {
-				font-size: 11px;
-				vertical-align: middle;
 				width: 25%;
-			}
-			.threads .thread-timestamp .created {
-				margin-right: 5px;
 			}
 			.threads .thread-actions {
 				width: 10%;
@@ -120,7 +116,7 @@
 								<td class="thread-title"><a target="_blank" href="<%= thread.url %>"><%= thread.title %></a></td>
 								<td class="thread-username text-right"><%= thread.username %></td>
 								<td class="thread-subreddit text-right">/r/<%= thread.subreddit %></td>
-								<td class="thread-timestamp">
+								<td class="thread-timestamp timestamp">
 									<span class="created">created <%= format.timestamp(thread.created) %></span>
 									<span class="updated text-success">(updated <%= format.timestamp(thread.updated) %>)</span>
 								</td>

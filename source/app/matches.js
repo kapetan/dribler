@@ -12,16 +12,6 @@ var matches = {};
 
 var noop = function() {};
 
-var error = function(callback, property) {
-	var message = util.format('Invalid %s', property);
-	var err = new Error(message);
-
-	err.validation = true;
-	callback(err);
-
-	return err;
-};
-
 var find = function(arr, fn) {
 	for(var i = 0; i < arr.length; i++) {
 		if(fn(arr[i])) return arr[i];
@@ -115,39 +105,56 @@ var allMatches = function() {
 	});
 };
 
-var validateThread = function(data, callback) {
-	if(!data.captcha) return error(callback, 'captcha');
-	if(!data.iden) return error(callback, 'captcha id');
-	if(!data.sr) return error(callback, 'subreddit');
-	if(!data.text) return error(callback, 'text');
-	if(!data.title) return error(callback, 'title');
+var validateThread = function(data) {
+	var errors = [];
+	var error = function(message) {
+		errors.push(new Error(message));
+	};
+
+	if(!data.captcha || !data.captcha.id || !data.captcha.solution) error('Missing captcha');
+	if(!data.subreddit) error('Missing subreddit');
+	if(!data.title) error('Missing title');
+	if(!data.text) error('Missing text');
+	if(!data.events || !data.events.view || !data.events.exclude) error('Missing events options');
+
+	return errors;
 };
 
 var createThread = function(reddit, data, callback) {
-	if(validateThread(data, callback)) return;
-	if(!reddit.session) return error(callback, 'reddit session');
+	var errors = validateThread(data);
 
-	data.kind = 'self';
-	data.sendreplies = true;
+	if(errors.length) return callback(errors[0]);
+	if(!reddit.session) return callback(new Error('Missing reddit session'));
 
-	reddit.post('/api/submit', data, function(err, response) {
+	var body = {
+		kind: 'self',
+		sendreplies: true,
+		sr: data.subreddit,
+		title: data.title,
+		captcha: data.captcha.solution,
+		iden: data.captcha.id,
+		text: data.text
+	};
+
+	reddit.post('/api/submit', body, function(err, response) {
 		if(err) return callback(err);
 		response = response.json.data;
 
 		callback(null, {
 			id: hat(),
 			title: data.title,
-			subreddit: data.sr,
+			subreddit: data.subreddit,
 			username: reddit.session.username,
 			url: response.url,
-			name: response.name
+			name: response.name,
+			events: data.events
 		});
 	});
 };
 
 var updateThread = function(thread, reddit, text, callback) {
-	if(!reddit.session) return error(callback, 'reddit session');
-	if(reddit.session.username !== thread.username) return error(callback, 'username');
+	if(!reddit.session) return callback(new Error('Missing reddit session'));
+	if(reddit.session.username !== thread.username) return callback(new Error('Invalid reddit session'));
 
 	reddit.post('/api/editusertext', { text: text, thing_id: thread.name }, callback);
 };

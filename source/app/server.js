@@ -67,18 +67,17 @@ ThreadPreview.prototype.renderHtml = function(callback) {
 };
 
 var parseQuery = function(params) {
-	if(!params) return { _length: 0 };
+	if(!params) return {};
 	if(!Array.isArray(params)) params = [params];
 
 	return params.reduce(function(acc, p) {
 		var keys = p.split(/\s*,\s*/);
 		keys.forEach(function(k) {
-			acc._length++;
-			acc[k] = true;
+			if(k) acc[k] = true;
 		});
 
 		return acc;
-	}, { _length: 0 });
+	}, {});
 };
 
 app.use('request.match', function(fn) {
@@ -204,11 +203,14 @@ app.post('/matches/reddit/{id}', function(request, response) {
 				if(err) return response.error(500, err);
 
 				match.createThread(reddit, {
-					captcha: data.thread_captcha_solution,
-					iden: data.thread_captcha_id,
-					sr: data.thread_subreddit,
+					captcha: {
+						id: data.thread_captcha_id,
+						solution: data.thread_captcha_solution
+					},
+					title: data.thread_title,
+					subreddit: data.thread_subreddit,
 					text: content,
-					title: data.thread_title
+					events: preview.query
 				}, function(err) {
 					if(err) return response.error(500, err);
 

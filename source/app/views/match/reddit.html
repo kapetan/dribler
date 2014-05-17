@@ -16,6 +16,11 @@
 				margin-bottom: 20px;
 			}
 
+			.user {
+				margin-bottom: 20px;
+				text-align: right;
+			}
+
 			.threads {
 				border: 1px solid #ddd;
 				table-layout: fixed;
@@ -108,7 +113,19 @@
 				<h1><%= format.teams(lineup.teams) %></h1>
 			</div>
 
+
 			<% if(match.threads.length) { %>
+				<form class="form-inline user" method="POST" action="/matches/reddit/<%= match.id %>/login">
+					<div class="form-group">
+						<input type="text" name="user_username" class="form-control" placeholder="Username">
+					</div>
+					<div class="form-group">
+						<input type="password" name="user_password" class="form-control" placeholder="Password">
+					</div>
+
+					<input type="submit" class="btn btn-default" value="Login">
+				</form>
+
 				<table class="table threads">
 					<tbody>
 						<% match.threads.forEach(function(thread) { %>
@@ -134,7 +151,7 @@
 				</table>
 			<% } %>
 
-			<form action="/matches/reddit/<%= match.id %>" method="POST" role="form">
+			<form action="/matches/reddit/<%= match.id %>" method="POST">
 				<div class="row">
 					<div id="reddit-form" class="col-md-6">
 						<fieldset class="user-fields">

@@ -249,6 +249,17 @@ app.post('/matches/reddit/{id}/{thread}/update', function(request, response) {
 	});
 });
 
+app.post('/matches/reddit/{id}/login', function(request, response) {
+	request.on('form', function(data) {
+		reddit({ username: data.user_username, password: data.user_password }, function(err, reddit) {
+			if(err) return response.error(400, err);
+
+			response.session = reddit.session;
+			response.redirect('/matches/reddit/' + request.params.id);
+		});
+	});
+});
+
 app.get('/public/{*}', function(request, response) {
 	send(request, request.params.glob)
 		.root(path.join(__dirname, 'public'))

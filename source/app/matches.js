@@ -12,6 +12,17 @@ var matches = {};
 
 var noop = function() {};
 
+var validator = function() {
+	var errors = [];
+	var fn = function(condition, message) {
+		if(condition) errors.push(new Error(message));
+	};
+
+	fn.errors = errors;
+
+	return fn;
+};
+
 var find = function(arr, fn) {
 	for(var i = 0; i < arr.length; i++) {
 		if(fn(arr[i])) return arr[i];
@@ -33,17 +44,29 @@ var decorate = function(match, data) {
 		});
 	};
 
+	match.addThread = function(thread, callback) {
+		thread.updated = Date.now();
+		thread.created = thread.updated;
+
+		this.threads.push(thread);
+		persistMatch(this, callback);
+	};
+
 	match.createThread = function(reddit, data, callback) {
 		var self = this;
 
 		createThread(reddit, data, function(err, thread) {
 			if(err) return callback(err);
+			self.addThread(thread, callback);
+		});
+	};
 
-			thread.updated = Date.now();
-			thread.created = thread.updated;
+	match.createThreadUsingUrl = function(reddit, data, callback) {
+		var self = this;
 
-			self.threads.push(thread);
-			persistMatch(self, callback);
+		createThreadUsingUrl(reddit, data, function(err, thread) {
+			if(err) return callback(err);
+			self.addThread(thread, callback);
 		});
 	};
 
@@ -106,18 +129,25 @@ var allMatches = function() {
 };
 
 var validateThread = function(data) {
-	var errors = [];
-	var error = function(message) {
-		errors.push(new Error(message));
-	};
+	var assert = validator();
 
-	if(!data.captcha || !data.captcha.id || !data.captcha.solution) error('Missing captcha');
-	if(!data.subreddit) error('Missing subreddit');
-	if(!data.title) error('Missing title');
-	if(!data.text) error('Missing text');
-	if(!data.events || !data.events.view || !data.events.exclude) error('Missing events options');
+	assert(!data.captcha || !data.captcha.id || !data.captcha.solution, 'Missing captcha');
+	assert(!data.subreddit, 'Missing subreddit');
+	assert(!data.title, 'Missing title');
+	assert(!data.text, 'Missing text');
+	assert(!data.events || !data.events.view || !data.events.exclude, 'Missing events options');
 
-	return errors;
+	return assert.errors;
+};
+
+var validateThreadUsingUrl = function(data) {
+	var assert = validator();
+
+	assert(!data.url, 'Missing url');
+	assert(!data.text, 'Missing text');
+	assert(!data.events || !data.events.view || !data.events.exclude, 'Missing events options');
+
+	return assert.errors;
 };
 
 var createThread = function(reddit, data, callback) {
@@ -157,6 +187,40 @@ var updateThread = function(thread, reddit, text, callback) {
 	if(reddit.session.username !== thread.username) return callback(new Error('Invalid reddit session'));
 
 	reddit.post('/api/editusertext', { text: text, thing_id: thread.name }, callback);
+};
+
+var createThreadUsingUrl = function(reddit, data, callback) {
+	var errors = validateThreadUsingUrl(data);
+
+	if(errors.length) return callback(errors[0]);
+	if(!reddit.session) return callback(new Error('Missing reddit session'));
+
+	var url = data.url.replace(/\/$/, '') + '.json';
+
+	reddit.get(url, function(err, response) {
+		if(err) return callback(err);
+
+		response = [0, 'data', 'children', 0, 'data'].reduce(function(acc, p) {
+			if(acc) return acc[p];
+		}, response);
+
+		if(!response) return callback(new Error('Empty response'));
+
+		var thread = {
+			id: hat(),
+			title: response.title,
+			subreddit: response.subreddit,
+			username: reddit.session.username,
+			url: response.url,
+			name: response.name,
+			events: data.events
+		};
+
+		updateThread(thread, reddit, data.text, function(err) {
+			if(err) return callback(err);
+			callback(null, thread);
+		});
+	});
 };
 
 db.keys().forEach(function(id) {

@@ -26,7 +26,8 @@ if(!config.reddit) {
 		'POST /api/new_captcha': jsonResponse(),
 		'POST /api/submit': jsonResponse(),
 		'POST /api/editusertext': jsonResponse(),
-		'POST /api/login': jsonResponse()
+		'POST /api/login': jsonResponse(),
+		'GET /r/*/comments/*/*': [{ data: { children: [{ data: {} }] } }]
 	});
 }
 
@@ -202,21 +203,27 @@ app.post('/matches/reddit/{id}', function(request, response) {
 			preview.renderMarkdown(function(err, content) {
 				if(err) return response.error(500, err);
 
-				match.createThread(reddit, {
+				var thread = {
 					captcha: {
 						id: data.thread_captcha_id,
 						solution: data.thread_captcha_solution
 					},
+					url: data.thread_url,
 					title: data.thread_title,
 					subreddit: data.thread_subreddit,
 					text: content,
 					events: preview.query
-				}, function(err) {
+				};
+
+				var onfinish = function(err) {
 					if(err) return response.error(500, err);
 
 					response.session = reddit.session;
 					response.redirect('/matches/reddit/' + match.id);
-				});
+				};
+
+				if(thread.url) match.createThreadUsingUrl(reddit, thread, onfinish)
+				else match.createThread(reddit, thread, onfinish);
 			});
 		};
 

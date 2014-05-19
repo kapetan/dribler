@@ -35,3 +35,27 @@ table > tbody > tr > td.timestamp {
 table  > tbody > tr > td.timestamp .created {
 	margin-right: 5px;
 }
+
+.separator {
+	position: relative;
+	padding: 20px 0;
+	text-align: center;
+}
+.separator .strikethrough {
+	top: 50%;
+	left: 0;
+	position: absolute;
+	z-index: -1;
+
+	width: 100%;
+	height: 1px;
+	background-color: #e5e5e5;
+}
+.separator .legend {
+	display: inline;
+	padding: 0 10px;
+	background-color: #fff;
+}
+.separator .legend:empty {
+	background-color: transparent;
+}

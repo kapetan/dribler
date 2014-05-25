@@ -37,6 +37,10 @@ format.timestamp = function(timestamp) {
 	return moment.duration(timestamp - Date.now()).humanize(true);
 };
 
+format.date = function(date) {
+	return moment(date).format('YYYY-MM-DD HH:mm:ss');
+};
+
 string.capitalize = function(str) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 };

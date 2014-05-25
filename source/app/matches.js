@@ -29,6 +29,17 @@ var find = function(arr, fn) {
 	}
 };
 
+var copy = function(obj) {
+	return JSON.parse(JSON.stringify(obj));
+};
+
+var toJSON = function(obj, properties) {
+	return properties.reduce(function(acc, p) {
+		acc[p] = obj[p];
+		return acc;
+	}, {});
+};
+
 var decorate = function(match, data) {
 	match.data = data;
 	match.id = data.id;
@@ -47,9 +58,14 @@ var decorate = function(match, data) {
 	match.addThread = function(thread, callback) {
 		thread.updated = Date.now();
 		thread.created = thread.updated;
+		match.data.updated = thread.updated;
 
 		this.threads.push(thread);
-		persistMatch(this, callback);
+
+		persistMatch(this, function(err) {
+			if(err) return callback(err);
+			callback(null, thread);
+		});
 	};
 
 	match.createThread = function(reddit, data, callback) {
@@ -82,6 +98,8 @@ var decorate = function(match, data) {
 			if(err) return callback(err);
 
 			thread.updated = Date.now();
+			match.data.updated = thread.updated;
+
 			persistMatch(self, callback);
 		});
 	};
@@ -96,10 +114,11 @@ var decorate = function(match, data) {
 };
 
 var persistMatch = function(match, callback) {
-	var data = match.data;
+	var data = toJSON(match.data, ['id', 'threads', 'lineup', 'feed', 'updated', 'created']);
 
-	data.updated = Date.now();
-	data.created = data.created || data.updated;
+	data.threads = data.threads.map(function(thread) {
+		return toJSON(thread, ['id', 'title', 'subreddit', 'username', 'url', 'name', 'events', 'updated', 'created']);
+	});
 
 	db.put(data.id, data, callback);
 };
@@ -109,6 +128,8 @@ var createMatch = function(data) {
 
 	data.id = hat();
 	data.threads = [];
+	data.updated = Date.now();
+	data.created = data.updated;
 
 	decorate(match, data);
 
@@ -177,7 +198,7 @@ var createThread = function(reddit, data, callback) {
 			username: reddit.session.username,
 			url: response.url,
 			name: response.name,
-			events: data.events
+			events: copy(data.events)
 		});
 	});
 };
@@ -213,7 +234,7 @@ var createThreadUsingUrl = function(reddit, data, callback) {
 			username: reddit.session.username,
 			url: response.url,
 			name: response.name,
-			events: data.events
+			events: copy(data.events)
 		};
 
 		updateThread(thread, reddit, data.text, function(err) {

@@ -121,8 +121,8 @@
 							<td class="match-latest"><strong><%= format.time(match.latest && match.latest.time) %></strong></td>
 							<td class="match-teams"><%= match.lineup ? format.teams(match.lineup.teams) : '' %></td>
 							<td class="match-timestamp timestamp">
-								<span class="created">created <%= format.timestamp(match.data.created) %></span>
-								<span class="updated text-success">(updated <%= format.timestamp(match.data.updated) %>)</span>
+								<span title="<%= format.date(match.data.created) %>" class="created">created <%= format.timestamp(match.data.created) %></span>
+								<span title="<%= format.date(match.data.updated) %>" class="updated text-success">(updated <%= format.timestamp(match.data.updated) %>)</span>
 							</td>
 							<td class="match-providers text-right"><%= match.data.lineup.provider %>/<%= match.data.feed.provider %></td>
 						</tr>

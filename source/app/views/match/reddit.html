@@ -26,10 +26,21 @@
 				table-layout: fixed;
 			}
 			.threads .thread-title {
-				width: 45%;
+				width: 40%;
 			}
+
+			.threads .thread-stream {
+				width: 7%;
+			}
+			.threads .thread-stream .progress {
+				margin: 0;
+			}
+			.threads .thread-stream .progress-bar {
+				width: 100%;
+			}
+
 			.threads .thread-username {
-				width: 10%;
+				width: 8%;
 			}
 			.threads .thread-subreddit {
 				text-align: left;
@@ -131,11 +142,18 @@
 						<% match.threads.forEach(function(thread) { %>
 							<tr class="active">
 								<td class="thread-title"><a target="_blank" href="<%= thread.url %>"><%= thread.title %></a></td>
+								<td class="thread-stream">
+									<% if(thread.stream) { %>
+										<div title="Active thread stream" class="progress progress-striped active">
+											<div class="progress-bar"></div>
+										</div>
+									<% } %>
+								</td>
 								<td class="thread-username text-right"><%= thread.username %></td>
 								<td class="thread-subreddit text-right">/r/<%= thread.subreddit %></td>
 								<td class="thread-timestamp timestamp">
-									<span class="created">created <%= format.timestamp(thread.created) %></span>
-									<span class="updated text-success">(updated <%= format.timestamp(thread.updated) %>)</span>
+									<span title="<%= format.date(thread.created) %>" class="created">created <%= format.timestamp(thread.created) %></span>
+									<span title="<%= format.date(thread.updated) %>" class="updated text-success">(updated <%= format.timestamp(thread.updated) %>)</span>
 								</td>
 								<td class="thread-actions">
 									<form class="form-link" action="/matches/reddit/<%= match.id %>/<%= thread.id %>/update" method="POST">

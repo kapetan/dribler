@@ -1,4 +1,6 @@
 var path = require('path');
+var stream = require('stream');
+var util = require('util');
 
 var root = require('root');
 var send = require('send');
@@ -64,6 +66,46 @@ ThreadPreview.prototype.renderHtml = function(callback) {
 	this.renderMarkdown(function(err, content) {
 		if(err) return callback(err);
 		callback(null, marked(content));
+	});
+};
+
+var ThreadStream = function(match, thread, reddit) {
+	stream.Writable.call(this, { objectMode: true, highWaterMark: 16 });
+
+	this.match = match;
+	this.thread = thread;
+	this.reddit = reddit;
+
+	this._latest = 0;
+	this._pending = null;
+};
+
+util.inherits(ThreadStream, stream.Writable);
+
+ThreadStream.prototype._write = function(event, encoding, callback) {
+	var self = this;
+
+	clearImmediate(this._pending);
+	this._pending = setImmediate(function() {
+		self._update(callback);
+	});
+};
+
+ThreadStream.prototype._update = function(callback) {
+	var self = this;
+	var preview = new ThreadPreview(this.match, this.thread.events);
+
+	if(this._latest === preview.events.length) return callback();
+
+	preview.renderMarkdown(function(err, content) {
+		if(err) return callback(err);
+
+		self.match.updateThread(self.thread.id, self.reddit, content, function(err) {
+			if(err) return callback(err);
+
+			self._latest = preview.events.length;
+			callback();
+		});
 	});
 };
 
@@ -215,8 +257,17 @@ app.post('/matches/reddit/{id}', function(request, response) {
 					events: preview.query
 				};
 
-				var onfinish = function(err) {
+				var onfinish = function(err, createdThread) {
 					if(err) return response.error(500, err);
+
+					var threadStream = new ThreadStream(match, createdThread, reddit);
+					createdThread.stream = threadStream;
+
+					match.pipe(threadStream);
+					threadStream.on('error', function() {
+						match.unpipe(threadStream);
+						delete threads[createdThread.id];
+					});
 
 					response.session = reddit.session;
 					response.redirect('/matches/reddit/' + match.id);

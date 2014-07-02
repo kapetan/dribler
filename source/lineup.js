@@ -28,7 +28,8 @@ var matchAll = function(list, str) {
 			for(var j = 0; j < matched.length; j++) {
 				var n = matched[j];
 
-				if((m.index <= n.index && n.index < m.index + m.length) || (n.index <= m.index && m.index < n.index + n.length)) {
+				if((m.index <= n.index && n.index < m.index + m.length) ||
+						(n.index <= m.index && m.index < n.index + n.length)) {
 					if(m.length > n.length) {
 						matched.splice(j, 1, m);
 					}
@@ -229,6 +230,10 @@ Lineup.prototype.matchTeam = function(str) {
 
 Lineup.prototype.matchAllTeams = function(str) {
 	return matchAll(this.teams, str);
+};
+
+Lineup.prototype.matchPlayer = function(str) {
+	return match(this.players, str);
 };
 
 Lineup.prototype.matchAllPlayers = function(str) {

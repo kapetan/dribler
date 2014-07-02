@@ -1,74 +1,58 @@
 var util = require('util');
-
-var cheerio = require('cheerio');
 var diacritic = require('diacritic');
-
 var events = require('../events');
-var request = require('../request');
 
 var UPDATE_FREQUENCY = 2 * 60 * 1000;
 
-var parse = function(html, lineup) {
-	var $ = cheerio.load(html);
+var validate = function(json) {
+	if(!Array.isArray(json)) return false;
 
-	var parseTime = function($item) {
-		var minute = $item
-			.find('.live_comments_minute strong')
-			.text()
-			.match(/(\+?\d+)/g);
-
-		if(!minute) return null;
-
-		minute = minute.map(function(m) {
-			return parseInt(m, 10);
-		});
-
-		var m = minute[0];
-		var e = minute.length > 1 ? minute[1] : 0;
-
-		return {
-			minute: m,
-			stoppage: e,
-			absolute: m + e
-		};
+	var nullable = function(obj) {
+		return (typeof obj === 'string') || obj === null || obj === undefined;
 	};
 
-	var parseType = function($item) {
-		var $text = $item.find('.live_comments_text');
-		var	type = $text
-			.find('> span:first-child')
-			.text()
-			.trim()
-			.toLowerCase()
-			.replace(/\s+/, '_');
+	return json.every(function(event) {
+		if(!event) return false;
 
-		return type || 'comment';
+		return nullable(event.time) &&
+			(typeof event.eventType === 'string') &&
+			nullable(event.commentary) &&
+			Array.isArray(event.players)
+	});
+};
+
+var parseTime = function(time) {
+	var minute = time && time.match(/(\+?\d+)/g);
+	if(!minute) return null;
+
+	minute = minute.map(function(m) {
+		return parseInt(m, 10);
+	});
+
+	var m = minute[0];
+	var e = minute.length > 1 ? minute[1] : 0;
+
+	return {
+		minute: m,
+		stoppage: e,
+		absolute: m + e
 	};
+};
 
-	var parsePlayers = function($item) {
-		return $item.find('.live_comments_text')
-			.contents()
-			.filter(function() {
-				var self = this[0];
-				return self.type === 'text' && self.data.trim().length;
-			})
-			.map(function() {
-				return this.data.trim();
-			})
-			.toArray();
-	};
+var parse = function(json, lineup) {
+	try {
+		json = JSON.parse(json);
+	} catch(err) {
+		return [];
+	}
 
-	var parsePlayerText = function($item) {
-		return parsePlayers($item)[0];
-	};
+	if(!validate(json)) return [];
 
-	var parseText = function($item) {
-		return $item.find('.live_comments_text').text().trim();
-	};
+	var id = 0;
 
-	var parseItem = function($item) {
-		var type = parseType($item);
-		var raw = parseText($item);
+	return json.map(function(event) {
+		var type = event.eventType.replace('-', '_');
+		var raw = event.commentary;
 		var extra = {};
 
 		if(type === 'own_goal') {
@@ -85,52 +69,46 @@ var parse = function(html, lineup) {
 		}
 
 		if(type === 'substitution') {
-			var players = parsePlayers($item);
-			raw = util.format('%s, %s', players[0], players[1]);
+			raw = util.format('%s, %s', event.players[0], event.players[1]);
 		} else if(type === 'yellow_card' || type === 'red_card' || type === 'goal' || type === 'assist') {
-			raw = parsePlayerText($item);
+			raw = raw || event.players[0];
 		} else {
 			type = 'comment';
-			raw = parseText($item);
 		}
 
 		raw = diacritic.clean(raw);
 
 		var data = raw;
-		var event = {
+		var result = {
+			id: id++,
 			raw: raw,
-			extra :extra,
-			time: parseTime($item),
+			extra: extra,
+			time: parseTime(event.time),
 			players: lineup.matchAllPlayers(raw),
 			teams: lineup.matchAllTeams(raw)
 		};
+		var players = event.players
+			.map(function(name) {
+				return lineup.matchPlayer(name);
+			})
+			.filter(function(player) {
+				return player;
+			});
 
 		if(type === 'substitution') {
-			if(event.players.length !== 2) type = 'comment';
-			else data = { leaving: event.players[0], entering: event.players[1] };
+			if(players.length !== 2) type = 'comment';
+			else data = { leaving: players[0], entering: players[1] };
 		}
 		if(type === 'yellow_card' || type === 'red_card' || type === 'goal' || type === 'assist') {
-			if(event.players.length !== 1) type = 'comment';
-			else data = event.players[0];
+			if(players.length !== 1) type = 'comment';
+			else data = players[0];
 		}
 
-		event.type = type;
-		event.data = data;
+		result.type = type;
+		result.data = data;
 
-		return event;
-	};
-
-	var id = 0;
-
-	return $('.live_comments_item')
-		.toArray()
-		.reverse()
-		.map(function(item) {
-			item = parseItem($(item));
-			item.id = (id++);
-
-			return item;
-		})
+		return result;
+	});
 };
 
 module.exports = function(url, lineup) {

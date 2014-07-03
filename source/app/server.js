@@ -16,7 +16,7 @@ var matches = require('./matches');
 
 var config = {
 	reddit: process.argv.indexOf('--no-reddit') === -1,
-	port: 10101
+	port: process.env.PORT || 10101
 };
 
 if(!config.reddit) {

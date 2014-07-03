@@ -16,8 +16,8 @@ The default development port is `10101`.
 
 As an example using `goal.com` as lineup and live event provider, the URLs below can be used in the matches form.
 
-* **Lineup** http://www.goal.com/en/match/argentina-vs-switzerland/1220127/lineups
-* **Feed** http://www.goal.com/feed/matches/match-events?format=goal&matchId=1220127&edition=en
+* **Lineup** `http://www.goal.com/en/match/argentina-vs-switzerland/1220127/lineups`
+* **Feed** `http://www.goal.com/feed/matches/match-events?format=goal&matchId=1220127&edition=en`
 
 After the match has been created it is possible to make a reddit thread using the lineup and live stream data. Go to the `reddit` tab, fill out the required information and use the available actions to customize the thread (the reddit password will not be persisted, only used once to get a session token, which is stored in a cookie).
 

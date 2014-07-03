@@ -2,8 +2,6 @@ var util = require('util');
 var diacritic = require('diacritic');
 var events = require('../events');
 
-var UPDATE_FREQUENCY = 2 * 60 * 1000;
-
 var validate = function(json) {
 	if(!Array.isArray(json)) return false;
 
@@ -48,8 +46,6 @@ var parse = function(json, lineup) {
 
 	if(!validate(json)) return [];
 
-	var id = 0;
-
 	return json.map(function(event) {
 		var type = event.eventType.replace('-', '_');
 		var raw = event.commentary;
@@ -80,7 +76,6 @@ var parse = function(json, lineup) {
 
 		var data = raw;
 		var result = {
-			id: id++,
 			raw: raw,
 			extra: extra,
 			time: parseTime(event.time),

@@ -1,7 +1,9 @@
 var stream = require('stream');
 var util = require('util');
+var crypto = require('crypto');
 
 var traverse = require('traverse');
+var stringify = require('json-stable-stringify');
 
 var request = require('./request');
 var lineup = require('./lineup');
@@ -25,6 +27,14 @@ var toCompactJSON = function() {
 	}, {});
 };
 
+var id = function(event) {
+	event = stringify(event);
+
+	return crypto.createHash('md5')
+		.update(event)
+		.digest('hex');
+};
+
 var EventStream = function(url, frequency) {
 	if(!(this instanceof EventStream)) return new EventStream(url, frequency);
 	stream.Readable.call(this, { objectMode: true, highWaterMark: 16 });
@@ -32,7 +42,7 @@ var EventStream = function(url, frequency) {
 	this._url = url;
 	this._frequency = frequency || DEFAULT_FREQUENCE;
 
-	this._latest = 0;
+	this._ids = [];
 	this._poll = null;
 };
 
@@ -41,9 +51,9 @@ util.inherits(EventStream, stream.Readable);
 EventStream.prototype._parse = function(content) {};
 
 EventStream.prototype._read = function(size) {
-	var self = this;
+	if(this._poll) return;
 
-	this.destroy();
+	var self = this;
 
 	this._poll = request.poll(this._frequency, this._url, function(err, body) {
 		if(err) return self.emit('error', err);
@@ -59,15 +69,31 @@ EventStream.prototype.destroy = function() {
 };
 
 EventStream.prototype.update = function(events) {
-	while(this._latest < events.length) {
-		var event = events[this._latest];
+	var self = this;
+	var ids = this._ids.slice();
+
+	for(var i = 0, j = 0; i < events.length; i++) {
+		var event = events[i];
+
+		event.id = id(event);
 		event.toCompactJSON = toCompactJSON;
 
-		this._latest++;
+		if(j === ids.length) {
+			this._ids.push(event.id);
 
-		if(!this.push(event)) {
-			this.destroy();
-			return;
+			if(!this.push(event)) {
+				this.destroy();
+				break;
+			}
+
+			continue;
+		}
+
+		if(ids[j] !== event.id) {
+			self.emit('amend', event, i);
+			this._ids.splice(i, 0, event.id);
+		} else {
+			j++;
 		}
 	}
 };

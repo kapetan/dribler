@@ -107,16 +107,11 @@ var parse = function(html, lineup) {
 		return event;
 	};
 
-	var id = 0;
-
 	return $('#live-text > p').toArray()
 		.concat($('#more-live-text > p').toArray())
 		.reverse()
 		.map(function(p) {
-			var event = parseParagraph($(p));
-			event.id = (id++);
-
-			return event;
+			return parseParagraph($(p));
 		});
 };
 

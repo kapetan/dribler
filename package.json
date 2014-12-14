@@ -17,6 +17,7 @@
     "flat-file-db": "~0.1.3",
     "hat": "0.0.3",
     "moment": "~2.6.0",
-    "json-stable-stringify": "~1.0.0"
+    "json-stable-stringify": "~1.0.0",
+    "redditor": "~1.1.0"
   }
 }

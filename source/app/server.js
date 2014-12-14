@@ -5,12 +5,12 @@ var util = require('util');
 var root = require('root');
 var send = require('send');
 var marked = require('marked');
+var reddit = require('redditor');
 
 var match = require('../index');
 
 var helpers = require('./helpers');
 var markdown = require('./markdown');
-var reddit = require('./reddit');
 
 var matches = require('./matches');
 

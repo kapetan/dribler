@@ -77,21 +77,11 @@ var ThreadStream = function(match, thread, reddit) {
 	this.reddit = reddit;
 
 	this._latest = 0;
-	this._pending = null;
 };
 
 util.inherits(ThreadStream, stream.Writable);
 
 ThreadStream.prototype._write = function(event, encoding, callback) {
-	var self = this;
-
-	clearImmediate(this._pending);
-	this._pending = setImmediate(function() {
-		self._update(callback);
-	});
-};
-
-ThreadStream.prototype._update = function(callback) {
 	var self = this;
 	var preview = new ThreadPreview(this.match, this.thread.events);
 
